@@ -257,10 +257,15 @@ Dokploy'da **"Resources"** sekmesinden ayarlayın:
 ## 🔗 Faydalı Komutlar
 
 ### Container'a Bağlanma
+**ÖNEMLİ:** Alpine Linux kullanıldığı için `bash` yerine `sh` kullanın:
 ```bash
 # Dokploy Console'dan veya SSH ile
 docker exec -it cronjobs-app sh
+# veya
+docker exec -it cronjobs-app /bin/sh
 ```
+
+**`bash` kullanmayın - Alpine Linux'ta yok!**
 
 ### Artisan Komutları
 ```bash

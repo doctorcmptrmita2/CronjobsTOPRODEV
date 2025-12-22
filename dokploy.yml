@@ -41,11 +41,12 @@ services:
     volumes:
       - app-storage:/var/www/html/storage
       - app-bootstrap-cache:/var/www/html/bootstrap/cache
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+    # depends_on kaldırıldı - Dokploy'da MySQL ve Redis ayrı servisler olarak oluşturulmalı
+    # depends_on:
+    #   mysql:
+    #     condition: service_healthy
+    #   redis:
+    #     condition: service_healthy
     networks:
       - cronjobs-network
     healthcheck:
@@ -55,50 +56,16 @@ services:
       retries: 3
       start_period: 40s
 
-  mysql:
-    image: mysql:8.0
-    container_name: cronjobs-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-cronjobs}
-      MYSQL_USER: ${DB_USERNAME:-cronjobs}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - cronjobs-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  redis:
-    image: redis:7-alpine
-    container_name: cronjobs-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
-    volumes:
-      - redis-data:/data
-    networks:
-      - cronjobs-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
+  # MySQL ve Redis servisleri Dokploy'da ayrı servisler olarak oluşturulmalı
+  # Bu yüzden burada tanımlanmamalı
+  # Dokploy Dashboard → Services → MySQL ve Redis servislerini ayrı olarak oluşturun
 
 networks:
   cronjobs-network:
     driver: bridge
 
 volumes:
-  mysql-data:
-    driver: local
-  redis-data:
-    driver: local
+  # mysql-data ve redis-data kaldırıldı - Dokploy'da ayrı servisler kullanılıyor
   app-storage:
     driver: local
   app-bootstrap-cache:
