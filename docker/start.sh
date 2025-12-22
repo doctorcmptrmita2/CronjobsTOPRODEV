@@ -3,12 +3,23 @@ set -e
 
 echo "🚀 Starting Cronjobs.to..."
 
-# Wait for MySQL to be ready
-echo "⏳ Waiting for MySQL..."
-while ! nc -z ${DB_HOST:-mysql} ${DB_PORT:-3306}; do
-    sleep 1
+# Wait for MySQL to be ready with timeout
+echo "⏳ Waiting for MySQL at ${DB_HOST:-mysql}:${DB_PORT:-3306}..."
+MAX_ATTEMPTS=60
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    if nc -z ${DB_HOST:-mysql} ${DB_PORT:-3306} 2>/dev/null; then
+        echo "✅ MySQL is ready!"
+        break
+    fi
+    ATTEMPT=$((ATTEMPT + 1))
+    if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+        echo "❌ MySQL connection timeout after ${MAX_ATTEMPTS} attempts"
+        exit 1
+    fi
+    echo "   Attempt $ATTEMPT/$MAX_ATTEMPTS - MySQL not ready yet, waiting..."
+    sleep 2
 done
-echo "✅ MySQL is ready!"
 
 # Run migrations if AUTO_MIGRATE is set
 if [ "${AUTO_MIGRATE}" = "true" ]; then

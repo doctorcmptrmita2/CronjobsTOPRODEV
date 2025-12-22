@@ -42,8 +42,10 @@ services:
       - app-storage:/var/www/html/storage
       - app-bootstrap-cache:/var/www/html/bootstrap/cache
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - cronjobs-network
     healthcheck:
