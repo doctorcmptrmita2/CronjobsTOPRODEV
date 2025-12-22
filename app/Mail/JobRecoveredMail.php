@@ -47,3 +47,4 @@ class JobRecoveredMail extends Mailable
 
 
 
+
