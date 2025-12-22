@@ -1,3 +1,4 @@
+# Auto detect text files and perform LF normalization
 * text=auto
 
 *.php diff=php
@@ -11,12 +12,3 @@
 
 composer.lock -diff
 package-lock.json -diff
-
-
-
-
-
-
-
-
-
