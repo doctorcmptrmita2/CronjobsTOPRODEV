@@ -49,6 +49,15 @@ Route::post('/preview/save', [GuestJobController::class, 'saveJob'])->name('gues
 // Public status page
 Route::get('/status/{slug}', [StatusPageController::class, 'show'])->name('status.public');
 
+// Health check endpoint (for Docker/Dokploy health checks)
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+        'service' => 'cronjobs',
+    ], 200);
+})->name('health')->withoutMiddleware(['web']);
+
 // Heartbeat ping endpoints (public, no auth required)
 Route::match(['get', 'post', 'head'], '/ping/{token}', [HeartbeatController::class, 'ping'])
     ->name('heartbeat.ping')

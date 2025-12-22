@@ -1,9 +1,28 @@
+# Build stage for Node.js assets
+FROM node:20-alpine AS node-builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install Node dependencies
+RUN npm ci --only=production
+
+# Copy source files for build
+COPY . .
+
+# Build assets
+RUN npm run build
+
+# Production stage
 FROM php:8.3-fpm-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
     git \
     curl \
+    wget \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -13,13 +32,11 @@ RUN apk add --no-cache \
     unzip \
     nginx \
     supervisor \
-    nodejs \
-    npm \
     netcat-openbsd
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd opcache
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd opcache
 
 # Install Redis extension
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
@@ -33,19 +50,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
+# Copy composer files
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies (with cache mount for better performance)
+RUN --mount=type=cache,target=/root/.composer/cache \
+    composer install --optimize-autoloader --no-dev --no-interaction --no-scripts
+
 # Copy application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev --no-interaction
+# Copy built assets from node-builder stage
+COPY --from=node-builder /app/public/build ./public/build
 
-# Install Node dependencies and build assets
-RUN npm ci && npm run build && rm -rf node_modules
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Run post-install scripts
+RUN composer dump-autoload --optimize
 
 # Copy configuration files
 COPY docker/nginx.conf /etc/nginx/nginx.conf
@@ -54,8 +73,11 @@ COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
-# Create log directory for supervisor
-RUN mkdir -p /var/log/supervisor
+# Create necessary directories and set permissions
+RUN mkdir -p /var/log/supervisor \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
 # Expose port
 EXPOSE 80
