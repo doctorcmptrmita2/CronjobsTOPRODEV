@@ -17,7 +17,6 @@ services:
       - DB_DATABASE=${DB_DATABASE:-cronjobs}
       - DB_USERNAME=${DB_USERNAME:-cronjobs}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
