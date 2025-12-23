@@ -42,6 +42,14 @@ Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 
 // Guest job preview system (try before signup)
 Route::post('/try', [GuestJobController::class, 'preview'])->name('guest.preview');
+Route::get('/try', function () {
+    // If there's a pending job in session, redirect to dashboard
+    if (session('pending_job')) {
+        return redirect()->route('guest.dashboard');
+    }
+    // Otherwise redirect to landing page
+    return redirect()->route('landing');
+})->name('guest.preview.get');
 Route::get('/preview', [GuestJobController::class, 'dashboard'])->name('guest.dashboard');
 Route::post('/preview/test', [GuestJobController::class, 'testRun'])->name('guest.test-run');
 Route::post('/preview/save', [GuestJobController::class, 'saveJob'])->name('guest.save-job');
