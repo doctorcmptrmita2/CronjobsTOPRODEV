@@ -91,7 +91,11 @@ DB_PASSWORD=your_secure_password_here
 DB_ROOT_PASSWORD=your_root_password_here
 ```
 
-**Önemli:** `DB_PASSWORD` ve `DB_ROOT_PASSWORD` için güçlü şifreler kullan!
+**Önemli Notlar:**
+- `DB_PASSWORD` **ZORUNLU** - MySQL kullanıcı şifresi
+- `DB_ROOT_PASSWORD` **OPSİYONEL** - Eğer set edilmezse, `DB_PASSWORD` otomatik kullanılır
+- Güvenlik için `DB_ROOT_PASSWORD` için ayrı ve güçlü bir şifre kullanmanız önerilir
+- Her iki şifre için de güçlü şifreler kullanın!
 
 #### Redis Ayarları
 
