@@ -39,6 +39,12 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
     fi
 done
 
+# Check APP_KEY
+if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
+    echo "⚠️  APP_KEY eksik! Oluşturuluyor..."
+    php artisan key:generate --force || echo "⚠️  APP_KEY oluşturulamadı, manuel oluşturulmalı"
+fi
+
 # Set correct permissions first
 echo "🔒 Setting permissions..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
