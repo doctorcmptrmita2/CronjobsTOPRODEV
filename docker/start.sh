@@ -42,7 +42,13 @@ done
 # Check APP_KEY
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
     echo "⚠️  APP_KEY eksik! Oluşturuluyor..."
-    php artisan key:generate --force || echo "⚠️  APP_KEY oluşturulamadı, manuel oluşturulmalı"
+    # EasyPanel'de .env dosyası yok, environment variable kullanılıyor
+    # Key'i oluştur ve kullanıcıya göster
+    GENERATED_KEY=$(php -r "echo 'base64:' . base64_encode(random_bytes(32));")
+    echo "⚠️  APP_KEY oluşturuldu ama Environment Variable olarak eklenmeli!"
+    echo "   EasyPanel Dashboard'da APP_KEY=$GENERATED_KEY ekle"
+    echo "   Şimdilik geçici olarak kullanılıyor..."
+    export APP_KEY="$GENERATED_KEY"
 fi
 
 # Set correct permissions first
